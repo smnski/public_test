@@ -101,7 +101,7 @@ def main():
             population_size=50,
             evaluator=MyEvaluator(),
             higher_is_better=True,
-            elitism_rate=0.05,
+            elitism_rate=0.1,
             operators_sequence=[
                 BlendCrossover(probability=0.7, alpha=0.5),
                 FloatVectorGaussNPointMutation(probability=0.1, sigma=0.2)
@@ -121,11 +121,10 @@ def main():
     best_solution = algo.execute()
     print(f"Best solution found: {best_solution}")
 
-    # Print best individuals from each generation
-    # best_individuals = algo.get_best_individuals()
-    # print("Best individuals from each generation:")
-    # for idx, individual in enumerate(best_individuals):
-    #     print(f"Generation {idx + 1}: {individual.get_pure_fitness()}")
+    best_individuals = algo.get_best_individuals()
+    print("Best individuals from each generation:")
+    for idx, individual in enumerate(best_individuals):
+        print(f"Generation {idx + 1}: {individual.get_pure_fitness()}")
 
     for subpop_invis in subpops_invis:
         for x in subpop_invis:
@@ -144,6 +143,21 @@ def main():
         plt.ylim(0, 10000)
         plt.grid(True)
         plt.show()
-        
+
+        print("Best individuals from each generation:")
+        fitness_values = []  # List to store fitness values for plotting
+        for idx, individual in enumerate(best_individuals):
+            fitness = individual.get_pure_fitness()
+            print(f"Generation {idx + 1}: {fitness}")
+            fitness_values.append(fitness)  # Add the fitness value to the list
+
+    # Plot the fitness values over generations
+    plt.plot(range(1, len(fitness_values) + 1), fitness_values, marker='o')
+    plt.xlabel('Generation')
+    plt.ylabel('Best Individual Fitness')
+    plt.title('Fitness of Best Individual Over Generations')
+    plt.grid(True)
+    plt.show()
+
 if __name__ == '__main__':
     main()
