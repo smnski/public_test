@@ -98,7 +98,7 @@ def main():
     algo = SimpleEvolutionWrapper(
         Subpopulation(
             creators=GAFloatVectorCreator(length=1, bounds=(-10, 10)),
-            population_size=10,
+            population_size=50,
             evaluator=MyEvaluator(),
             higher_is_better=True,
             elitism_rate=0.05,
@@ -110,7 +110,7 @@ def main():
         ),
         breeder=SimpleBreeder(),
         max_workers=4,
-        max_generation=5,
+        max_generation=10,
         statistics=BestAverageWorstStatistics()
     )
 
@@ -127,28 +127,23 @@ def main():
     # for idx, individual in enumerate(best_individuals):
     #     print(f"Generation {idx + 1}: {individual.get_pure_fitness()}")
 
-    def f(x):
-        return x**2
-
     for subpop_invis in subpops_invis:
         for x in subpop_invis:
             print(x.get_pure_fitness())
         print("---------------------------")
 
     for subpop_invis in subpops_invis:
-            x_points = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]  # You can change this list as needed
-            y_points = [x.get_pure_fitness() for x in subpop_invis]
-            x = np.linspace(-10, 10, 400)
-            y = f(x)
-            plt.plot(x, label=r'$y = x^2$', color='blue')  # Plot the x^2 function
-            plt.scatter(x_points, y_points, color='red', zorder=5)
-            for (x_val, y_val) in zip(x_points, y_points):
-                plt.text(x_val, y_val, f'({x_val}, {y_val})', fontsize=9, ha='right')
-            plt.xlabel('x')
-            plt.ylabel('y')
-            plt.title('Plot of $y = x^2$ with points')
-            plt.grid(True)
-            plt.legend()
-            plt.show()
+        x_points = [i for i in range(len(subpop_invis))]  # Use the index as x_points
+        y_points = [x.get_pure_fitness() for x in subpop_invis]
+    
+        plt.scatter(x_points, y_points, color='red', zorder=5)
+    
+        plt.xlabel('Index of Subpopulation')
+        plt.ylabel('Fitness Value')
+        plt.title('Fitness Values of Individuals in Subpopulation')
+        plt.ylim(0, 10000)
+        plt.grid(True)
+        plt.show()
+        
 if __name__ == '__main__':
     main()
