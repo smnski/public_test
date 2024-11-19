@@ -18,6 +18,7 @@ import numpy as np
 # Zakres na jakim prowadzimy maksymalizacje
 LOWER_BOUND = -100
 UPPER_BOUND = 100
+allis = []
 
 # Funkcja utrzymujaca wartosci w zadanym przedziale
 def check_bounds(individual):
@@ -82,15 +83,13 @@ class SimpleEvolutionWrapper(SimpleEvolution):
 
         # Save the best individual of this generation to the list
         self.best_individuals.append(self.best_of_gen)
+        allis.append(self.population.sub_populations[0])
 
     def get_best_individuals(self):
         """
         Return the list of best individuals from each generation.
         """
         return self.best_individuals
-    
-    def get_all_individuals(self):
-        return self.population.sub_populations[0]
 
 # Main function to run the algorithm
 def main():
@@ -98,7 +97,7 @@ def main():
     algo = SimpleEvolutionWrapper(
         Subpopulation(
             creators=GAFloatVectorCreator(length=1, bounds=(-10, 10)),
-            population_size=50,
+            population_size=10,
             evaluator=MyEvaluator(),
             higher_is_better=True,
             elitism_rate=0.05,
@@ -110,7 +109,7 @@ def main():
         ),
         breeder=SimpleBreeder(),
         max_workers=4,
-        max_generation=50,
+        max_generation=5,
         statistics=BestAverageWorstStatistics()
     )
 
@@ -127,10 +126,10 @@ def main():
     for idx, individual in enumerate(best_individuals):
         print(f"Generation {idx + 1}: {individual.get_pure_fitness()}")
 
-    alli = algo.get_all_individuals()
-    print("All individuals: ")
-    print(alli.population_size)
-    
+    for alli in allis:
+        for x in alli.individuals:
+            print(x.get_pure_fitness())
+        print("-----------------------------")
 
 if __name__ == '__main__':
     main()
