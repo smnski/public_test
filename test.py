@@ -90,10 +90,7 @@ class SimpleEvolutionWrapper(SimpleEvolution):
         return self.best_individuals
     
     def get_all_individuals(self):
-        all_individuals = []
-        for subpop in self.population.sub_populations:
-            all_individuals.extend(subpop.individuals)
-        return all_individuals
+        return self.population.sub_populations[0]
 
 # Main function to run the algorithm
 def main():
@@ -129,6 +126,11 @@ def main():
     print("Best individuals from each generation:")
     for idx, individual in enumerate(best_individuals):
         print(f"Generation {idx + 1}: {individual.get_pure_fitness()}")
+
+    alli = algo.get_all_individuals()
+    print("All individuals: ")
+    print(alli.population_size)
+    
 
 if __name__ == '__main__':
     main()
