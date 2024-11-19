@@ -57,7 +57,7 @@ class BlendCrossover(GeneticOperator):
 
         return [offspring1, offspring2]
     
-# Funkcja przeprowadzajaca ewolucja
+# Funkcja przeprowadzajaca ewolucje
 def main():
     # Przypisanie algorytmu SimpleEvolution z EC-KitY i nadanie mu odpowiednich parametrow
     algo = SimpleEvolution(
