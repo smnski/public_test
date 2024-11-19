@@ -94,6 +94,7 @@ class SimpleEvolutionWrapper(SimpleEvolution):
 
 # Main function to run the algorithm
 def main():
+    numerator = 0
     # Przypisanie algorytmu SimpleEvolutionWrapper z EC-KitY i nadanie mu odpowiednich parametrow
     algo = SimpleEvolutionWrapper(
         Subpopulation(
@@ -110,7 +111,7 @@ def main():
         ),
         breeder=SimpleBreeder(),
         max_workers=4,
-        max_generation=15,
+        max_generation=10,
         statistics=BestAverageWorstStatistics()
     )
 
@@ -137,12 +138,14 @@ def main():
     
         plt.scatter(x_points, y_points, color='red', zorder=5)
     
-        plt.xlabel('Index of Subpopulation')
-        plt.ylabel('Fitness Value')
-        plt.title('Fitness Values of Individuals in Subpopulation')
+        plt.xlabel('Indeks osobnika')
+        plt.ylabel('Wartość przystosowania')
+        plt.title('Wartości przystosowania osobników w populacji nr. ' + str(numerator+1))
         plt.ylim(0, 10000)
         plt.grid(True)
-        plt.show()
+        plt.savefig(f"subpop_plot_generation_{numerator + 1}.png")
+        plt.clf()  # Clear the figure after saving
+        numerator += 1
 
         print("Best individuals from each generation:")
         fitness_values = []  # List to store fitness values for plotting
