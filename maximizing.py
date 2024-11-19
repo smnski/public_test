@@ -1,4 +1,4 @@
-from time import process_time
+# Potrzebne narzedzia z EC-KitY
 from eckity.algorithms.simple_evolution import SimpleEvolution
 from eckity.breeders.simple_breeder import SimpleBreeder
 from eckity.creators.ga_creators.float_vector_creator import GAFloatVectorCreator
@@ -9,16 +9,29 @@ from eckity.subpopulation import Subpopulation
 from eckity.evaluators.simple_individual_evaluator import SimpleIndividualEvaluator
 from eckity.genetic_operators.genetic_operator import GeneticOperator
 
-# Define the bounds
-LOWER_BOUND = -10
-UPPER_BOUND = 10
+# Inne potrzebne biblioteki
+import random
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
-# Define the objective function to minimize (f(x) = x^2)
+# Zakres na jakim prowadzimy maksymalizacje
+LOWER_BOUND = -100
+UPPER_BOUND = 100
+
+# Funkcja utrzymujaca wartosci w zadanym przedziale
+def check_bounds(individual):
+    value = individual.cell_value(0)
+    bounded_value = min(max(value, LOWER_BOUND), UPPER_BOUND)
+    individual.set_cell_value(0, bounded_value)
+
+# Klasa obliczajaca przystosowanie
 class MyEvaluator(SimpleIndividualEvaluator):
     def evaluate_individual(self, individual):
         x = individual.cell_value(0)
         return x**2
-
+    
+# Klasa przeprowadzajaca Blend crossover na wartosciach rodzicow
 class BlendCrossover(GeneticOperator):
     def __init__(self, probability, alpha=0.5):
         super().__init__(probability=probability, arity=2)
@@ -29,59 +42,56 @@ class BlendCrossover(GeneticOperator):
         x1 = parent1.cell_value(0)
         x2 = parent2.cell_value(0)
 
-        # Blend crossover calculation
-        new_x1 = (1 - self.alpha) * x1 + self.alpha * x2
-        new_x2 = self.alpha * x1 + (1 - self.alpha) * x2
-
-        # Create offspring clones and set their new values
         offspring1 = parent1.clone()
         offspring2 = parent2.clone()
+
+        gamma = (1. + 2. * self.alpha) * random.random() - self.alpha
+        new_x1 = (1. - gamma) * x1 + gamma * x2
+        new_x2 = gamma * x1 + (1. - gamma) * x2
+
         offspring1.set_cell_value(0, new_x1)
         offspring2.set_cell_value(0, new_x2)
 
-        # Ensure bounds are respected using check_bounds function
         check_bounds(offspring1)
         check_bounds(offspring2)
 
         return [offspring1, offspring2]
-
-def check_bounds(individual):
-    value = individual.cell_value(0)
-    bounded_value = min(max(value, LOWER_BOUND), UPPER_BOUND)
-    individual.set_cell_value(0, bounded_value)
-
+    
+# Funkcja przeprowadzajaca ewolucja
 def main():
-    start_time = process_time()
-
-    # Initialize the evolutionary algorithm
+    # Przypisanie algorytmu SimpleEvolution z EC-KitY i nadanie mu odpowiednich parametrow
     algo = SimpleEvolution(
         Subpopulation(
-            creators=GAFloatVectorCreator(length=1, bounds=(LOWER_BOUND, UPPER_BOUND)),  # Single-point solution (length=1)
+            # W pierwszej subpopulacji tworzymy punkty z zakresu [-10, 10]
+            creators=GAFloatVectorCreator(length=1, bounds=(-10, 10)),
             population_size=50,
             evaluator=MyEvaluator(),
-            higher_is_better=True,  # Minimization problem
-            elitism_rate=0.1,
+            # True, poniewaz problem maksymalizacji
+            higher_is_better=True,
+            # Niewielki elityzm, aby kilka najlepszych jednostek przeszlo dalej, jednoczesnie wciaz eksplorujac nowe rozwiazania
+            elitism_rate=0.05,
+            # W kazdej iteracji odbywa sie Blend Crossover oraz szansa 10% na dodatkowa mutacje w zakresie 0.2 w rozkladzie Gaussa
             operators_sequence=[
                 BlendCrossover(probability=0.7, alpha=0.5),  # Blend crossover
-                FloatVectorGaussNPointMutation(probability=0.1, sigma=0.2)  # Mutation with bounds
+                FloatVectorGaussNPointMutation(probability=0.1, sigma=0.2)
             ],
+            # Metoda wyboru tournament - Starcia miedzy pojedynczymi jednostkami i wybor najlepszej
             selection_methods=[
-                (TournamentSelection(tournament_size=4), 1)  # Tournament selection
+                (TournamentSelection(tournament_size=4), 1)
             ]
         ),
         breeder=SimpleBreeder(),
         max_workers=4,
-        max_generation=500,
+        max_generation=50,
         statistics=BestAverageWorstStatistics()
     )
 
-    # Evolve the population
+    # Ewolucja populacji
     algo.evolve()
 
-    # Execute and print the best solution
+    # Uruchomienia algorytmu i zapisanie najlepszego rozwiazania
     best_solution = algo.execute()
     print(f"Best solution found: {best_solution}")
-    print(f"Total time: {process_time() - start_time}")
 
 if __name__ == '__main__':
     main()
